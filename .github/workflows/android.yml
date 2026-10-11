@@ -1,0 +1,65 @@
+name: Build APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install SDK packages
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Install Gradle
+        run: |
+          curl -fsSL -o /tmp/gradle.zip https://services.gradle.org/distributions/gradle-8.11.1-bin.zip
+          sudo unzip -q /tmp/gradle.zip -d /opt
+          echo "/opt/gradle-8.11.1/bin" >> "$GITHUB_PATH"
+
+      - name: Unpack app assets and keystore
+        run: |
+          base64 -d android/app/release.keystore.b64 > android/app/release.keystore
+          base64 -d android/app/src/main/res/drawable/ic_launcher.png.b64 > android/app/src/main/res/drawable/ic_launcher.png
+          mkdir -p android/app/src/main/assets/assets
+          base64 -d android/web/index.js.gz.b64 | gzip -d > android/app/src/main/assets/assets/index-COAqX_fe.js
+          base64 -d android/web/routes.js.gz.b64 | gzip -d > android/app/src/main/assets/assets/routes-CvxROgeH.js
+
+      - name: Build release APK
+        working-directory: android
+        run: |
+          gradle assembleRelease --no-daemon
+          cp app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/family-bill-calendar.apk
+
+      - name: Publish APK
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.1.0
+          name: Family Bill Calendar 1.1
+          make_latest: true
+          files: android/app/build/outputs/apk/release/family-bill-calendar.apk
+          fail_on_unmatched_files: true
+          body: |
+            Install on Android:
+
+            1. Download family-bill-calendar.apk.
+            2. Open it and allow install from this source if Android asks.
+            3. Open Family Bill Calendar from your home screen.
+
+            Bills stay on the phone.

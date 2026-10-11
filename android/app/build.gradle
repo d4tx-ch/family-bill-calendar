@@ -1,0 +1,42 @@
+plugins {
+    id "com.android.application"
+}
+
+android {
+    namespace "com.familybillcalendar.app"
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.familybillcalendar.app"
+        minSdk 26
+        targetSdk 35
+        versionCode 2
+        versionName "1.1"
+    }
+
+    signingConfigs {
+        release {
+            storeFile file("release.keystore")
+            storePassword "billcalendar"
+            keyAlias "bills"
+            keyPassword "billcalendar"
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation "androidx.webkit:webkit:1.12.1"
+    implementation "androidx.appcompat:appcompat:1.7.0"
+}
