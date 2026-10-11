@@ -42,7 +42,8 @@ jobs:
       - name: Unpack app assets and keystore
         run: |
           base64 -d android/app/release.keystore.b64 > android/app/release.keystore
-          base64 -d android/app/src/main/res/drawable/ic_launcher.png.b64 > android/app/src/main/res/drawable/ic_launcher.png
+          mkdir -p android/app/src/main/res/drawable
+          base64 -d android/web/ic_launcher.png.b64 > android/app/src/main/res/drawable/ic_launcher.png
           mkdir -p android/app/src/main/assets/assets
           base64 -d android/web/index.js.gz.b64 | gzip -d > android/app/src/main/assets/assets/index-COAqX_fe.js
           base64 -d android/web/routes.js.gz.b64 | gzip -d > android/app/src/main/assets/assets/routes-CvxROgeH.js
